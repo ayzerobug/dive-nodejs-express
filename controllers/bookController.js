@@ -1,10 +1,20 @@
-const books = [];
+let books = [];
 
 const getBooks = (req, res) => {
+  const { author, limit } = req.query;
+
+  let filteredBooks = books;
+  if (author) {
+    filteredBooks = books.filter((bk) => bk.author === author);
+  }
+  if (limit) {
+    filteredBooks = filteredBooks.slice(0, parseInt(limit));
+  }
+
   const response = {
     success: true,
     message: "Books Retrived",
-    data: { books },
+    data: { books: filteredBooks },
   };
   res.send(response);
 };
@@ -91,9 +101,34 @@ const updateBook = (req, res) => {
   res.send(response);
 };
 
+const deleteBook = (req, res) => {
+  const bookId = req.params.id;
+
+  const book = books.find((bk) => bk.id === parseInt(bookId));
+
+  if (!book) {
+    const response = {
+      success: false,
+      message: `Book not found`,
+    };
+    return res.status(404).send(response);
+  }
+
+  const newBooks = books.filter((bk) => bk.id !== book.id);
+  books = newBooks;
+
+  const response = {
+    success: true,
+    message: `Book is successfully deleted`,
+  };
+
+  res.send(response);
+};
+
 module.exports = {
   getBooks,
   createBook,
   getBookById,
   updateBook,
+  deleteBook,
 };
