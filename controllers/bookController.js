@@ -1,57 +1,31 @@
-let books = [];
+const bookService = require("../services/bookService");
 
-const getBooks = (req, res) => {
-  const { author, limit } = req.query;
-
-  let filteredBooks = books;
-  if (author) {
-    filteredBooks = books.filter((bk) => bk.author === author);
-  }
-  if (limit) {
-    filteredBooks = filteredBooks.slice(0, parseInt(limit));
-  }
-
+const getBooks = async (req, res) => {
+  const books = await bookService.getAllBooks();
   const response = {
     success: true,
     message: "Books Retrived",
-    data: { books: filteredBooks },
+    data: { books },
   };
   res.send(response);
 };
 
-const createBook = (req, res) => {
+const createBook = async (req, res) => {
   const data = req.body;
+  const book = await bookService.createBook(data.name, data.author);
 
-  const { name } = data; //const name = data.name;
-
-  const existingBook = books.find((book) => book.name === name);
-
-  if (existingBook) {
-    const response = {
-      success: false,
-      message: `Book ${name} already exist`,
-    };
-    //409 Status code means conflict.
-    return res.status(409).send(response);
-  }
-
-  const newBook = {
-    id: books.length + 1,
-    ...data,
-  };
-  books.push(newBook);
   const response = {
     success: true,
     message: "Book successfully created",
-    data: { book: newBook },
+    data: { book },
   };
   res.status(201).send(response);
 };
 
-const getBookById = (req, res) => {
+const getBookById = async (req, res) => {
   const bookId = req.params.id;
 
-  const book = books.find((bk) => bk.id === parseInt(bookId));
+  const book = await bookService.findBook(bookId);
 
   if (!book) {
     const response = {
@@ -70,52 +44,25 @@ const getBookById = (req, res) => {
   res.send(response);
 };
 
-const updateBook = (req, res) => {
+const updateBook = async (req, res) => {
   const bookId = req.params.id;
+  const { name, author } = req.body;
 
-  const book = books.find((bk) => bk.id === parseInt(bookId));
-
-  if (!book) {
-    const response = {
-      success: false,
-      message: `Book not found`,
-    };
-    return res.status(404).send(response);
-  }
-
-  const data = req.body;
-  const newBook = {
-    ...book,
-    ...data,
-  };
-
-  const bookIndex = books.findIndex((bk) => book.id === bk.id);
-  books[bookIndex] = newBook;
+  const book = await bookService.updateBook(bookId, name, author);
 
   const response = {
     success: true,
     message: `Book retrieved`,
-    data: { book: newBook },
+    data: { book },
   };
 
   res.send(response);
 };
 
-const deleteBook = (req, res) => {
+const deleteBook = async (req, res) => {
   const bookId = req.params.id;
 
-  const book = books.find((bk) => bk.id === parseInt(bookId));
-
-  if (!book) {
-    const response = {
-      success: false,
-      message: `Book not found`,
-    };
-    return res.status(404).send(response);
-  }
-
-  const newBooks = books.filter((bk) => bk.id !== book.id);
-  books = newBooks;
+  await bookService.deleteBook(bookId);
 
   const response = {
     success: true,

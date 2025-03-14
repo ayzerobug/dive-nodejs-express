@@ -1,12 +1,14 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
-const port = 3000;
+const port = process.env.APP_PORT;
 
 const bookRoutes = require("./routes/bookRoutes");
 
 app.use(express.json());
-app.use(express.static("public"))
+app.use(express.static("public"));
 app.use(morgan("combined"));
 
 app.use((req, res, next) => {
