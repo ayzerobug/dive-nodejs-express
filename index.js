@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const mongoose = require("mongoose");
 const port = process.env.APP_PORT;
 
 const bookRoutes = require("./routes/bookRoutes");
@@ -55,6 +56,12 @@ app.get("/", (request, response) => {
 //Use bookRoutes where /books is the endpoint
 app.use("/books", logBookEndpoint, bookRoutes);
 
-app.listen(port, () => {
-  console.log(`Server listening to port: ${port}`);
-});
+mongoose
+  .connect(process.env.DATABASE_URI)
+  .then((result) => {
+    console.log("Connection to MongoDB successful");
+    app.listen(port, () => {
+      console.log(`Server listening to port: ${port}`);
+    });
+  })
+  .catch((err) => console.error(err));

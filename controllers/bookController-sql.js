@@ -1,7 +1,7 @@
-const Book = require("../models/book");
+const bookService = require("../services/bookService");
 
 const getBooks = async (req, res) => {
-  const books = await Book.find();
+  const books = await bookService.getAllBooks();
   const response = {
     success: true,
     message: "Books Retrived",
@@ -12,13 +12,7 @@ const getBooks = async (req, res) => {
 
 const createBook = async (req, res) => {
   const data = req.body;
-
-  const rawBook = new Book({
-    name: data.name,
-    author: data.author,
-  });
-
-  const book = await rawBook.save();
+  const book = await bookService.createBook(data.name, data.author);
 
   const response = {
     success: true,
@@ -31,9 +25,7 @@ const createBook = async (req, res) => {
 const getBookById = async (req, res) => {
   const bookId = req.params.id;
 
-  const book = await Book.findOne({
-    _id: bookId,
-  });
+  const book = await bookService.findBook(bookId);
 
   if (!book) {
     const response = {
@@ -56,16 +48,7 @@ const updateBook = async (req, res) => {
   const bookId = req.params.id;
   const { name, author } = req.body;
 
-  await Book.updateOne(
-    { _id: bookId },
-    {
-      name,
-      author,
-    }
-  );
-  const book = await Book.findOne({
-    _id: bookId,
-  });
+  const book = await bookService.updateBook(bookId, name, author);
 
   const response = {
     success: true,
@@ -79,9 +62,7 @@ const updateBook = async (req, res) => {
 const deleteBook = async (req, res) => {
   const bookId = req.params.id;
 
-  await Book.deleteOne({
-    _id: bookId,
-  });
+  await bookService.deleteBook(bookId);
 
   const response = {
     success: true,
